@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+# Item class
+# Define here the models for your scraped items
+#
+# See documentation in:
+# http://doc.scrapy.org/en/latest/topics/items.html
+
+import scrapy
+
+
+class ImdbItem(scrapy.Item):
+    # define the fields for your item here like:
+    review = scrapy.Field()
+    small = scrapy.Field()
+    rating = scrapy.Field()
+
+# Spider :
+from scrapy.spiders import Spider
+from scrapy.selector import Selector
+from imdb.items import ImdbItem
+
+
+class ImdbSpider(Spider):
+    name = "imdb"
+    allowed_domains = ["imdb.com"]
+    start_urls = [
+        "http://www.imdb.com/title/tt0068646/reviews?ref_=%20best",
+        
+    ]
+
+    def parse(self, response):
+        """
+        The lines below is a spider contract. For more info see:
+        http://doc.scrapy.org/en/latest/topics/contracts.html
+        @url http://www.dmoz.org/Computers/Programming/Languages/Python/Resources/
+        @scrapes name
+        """
+        sel = Selector(response)
+        sites = sel.xpath('//div[contains(@id,"tn15content")]/p') 
+        #sites = sel.xpath('//div[contains(@id,"tn15content")]')
+	items = []
+
+        for site in sites:
+            item = ImdbItem()
+            item['review'] = site.xpath('text()').extract()
+            #Not Working: 
+            #item['review'] = site.xpath('/p/text()').extract()
+            #item['small'] = site.xpath('/div/small').extract()
+            #item['rating'] = site.xpath('/div/img').extract()
+            
+            items.append(item)
+
+        return items
